@@ -1,25 +1,79 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import Navbar from './Components/Navbar'
+import Landing from './Components/Landing'
+import About from './Components/About'
+import Share from './Components/Share'
+import Footer from './Components/Footer'
+import { Route, Routes, BrowserRouter as Router } from 'react-router-dom'
+import Signup from './Components/Signup'
+import Signin from './Components/Signin'
+import ForgotPassword from './Components/ForgotPassword'
+import DoctorsDashboard from './Components/DoctorsDashboard'
+import PatientList from './Components/PatientList'
+import PatientPage from './Components/PatientPage'
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+    <Router>
+      <Routes>
+        <Route path= "/" element={
+          <>
+          <Navbar/>
+          <Landing/>
+          <About/>
+          <Share/>
+          <Footer/>
+          </>
+        }></Route> 
+
+        <Route path='/access-records' element={
+          <>
+          <Navbar/>
+          <Signup/>
+          </>
+        }>
+        </Route>
+
+        <Route path='/sign-in' element={
+          <>
+          <Navbar/>
+          <Signin/>
+          </>
+        }></Route>
+
+        <Route path="/forgot-password" element={
+          <>
+          <Navbar/>
+          <ForgotPassword/>
+          </>
+        }></Route>
+
+        <Route path='/doc' element={
+          <>
+          <DoctorsDashboard/>
+          </>
+        }></Route>
+
+        <Route path ='/patient-list' element={
+          <>
+          <PatientList/>
+          </>
+        }></Route>
+        <Route path='/patient-page' element={
+          <>
+          <PatientPage/>
+          </>
+        }>
+
+        </Route>
+
+      </Routes>
+    </Router>
+
+
+    </>
+  )
 }
 
-export default App;
+export default App
