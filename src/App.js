@@ -65,9 +65,15 @@ function App() {
           <PatientPage/>
           </>
         }>
+          
 
         </Route>
 
+        {/* <Route path='/medical-records' element={
+          <>
+          <MedicalRecords/>
+          </>
+        }></Route> */}
       </Routes>
     </Router>
 

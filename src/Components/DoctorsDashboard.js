@@ -1,10 +1,32 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarCheck, faFileLines, faCalendar, faFolderOpen, faHeartPulse, faPerson, faUserTie, faRightFromBracket, faBell, faScissors} from '@fortawesome/free-solid-svg-icons';
 import Calendar from './Calendar';
 import { Link } from 'react-router-dom';
 
 function DoctorsDashboard() {
+    const [docName, setDocName] = useState('')
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:4040/doc_data', {
+                    method: 'GET',
+                    headers:{
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                    },
+                });
+                if (!response.ok){
+                    throw new Error('Failed to fetch doc data');
+                }
+                const docData = await response.json();
+                setDocName(docData.name);
+            } catch (error){
+                console.log(error)
+            }
+        };
+        fetchData();
+    },[])
   return (
     <>
         <div className='flex bg-gray-200'>
@@ -35,7 +57,7 @@ function DoctorsDashboard() {
                <input className='bg-gray-100 p-2 w-2/4 rounded-xl border-none' type='text' placeholder='Search'></input>
                <div className='flex flex-row gap-2   text-center'>
                    <p className='ml-10 p-2 font-semibold' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem" }}><FontAwesomeIcon icon={faBell} /> </p>
-                   <p className='text-center font-semibold p-2'style={{letterSpacing:'2px'}}>Dr. Helwett Packard</p>
+                   <p className='text-center font-semibold p-2'style={{letterSpacing:'2px'}}>Dr. {docName}</p>
                    <p className=' p-2 font-semibold' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem" }}><FontAwesomeIcon icon={faUserTie} /> </p>
                </div>
            </div>
@@ -43,7 +65,7 @@ function DoctorsDashboard() {
            <div className='p-5 flex gap-1'>
             <div className='p-5 w-4/5'>
                     <div className='p-5 pl-10 w-3/5'>
-                        <h1 className='font-semibold text-2xl' style={{letterSpacing:'3px'}}>Hello, Dr. Packard</h1>
+                        <h1 className='font-semibold text-2xl' style={{letterSpacing:'3px'}}>Hello, Dr. {docName}</h1>
                         <h1 className='font-light'>Have a great day at work!!</h1>
                     </div>
 
