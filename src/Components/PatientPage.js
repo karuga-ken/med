@@ -28,11 +28,11 @@ function PatientPage() {
         e.preventDefault();
         try {
             const response = await axios.post('http://127.0.0.1:4040/add-patient-record', {
-                patient_id: patient.id,  // Assuming patient.id exists
+                patient_id: patient.id,  
                 ...medRecord
             }, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('access_token')}`  // If you're using JWT
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`  
                 }
             });
             console.log(response.data);
@@ -43,10 +43,10 @@ function PatientPage() {
                 Prescriptions: '',
                 Surgeries_Procedures: ''
             });
-            // Optionally, you can update the UI to show the new record
+            
         } catch (error) {
             console.error('Error adding patient record:', error);
-            // Handle error (e.g., show error message to user)
+            
         }
     };
 
@@ -198,7 +198,7 @@ function PatientPage() {
         </div>
     </div>
 ) : (
-    <MedicalRecords/>
+    <MedicalRecords selectedPatient={patient}/>
 )}
         </div>
 

@@ -1,9 +1,10 @@
 from flask import Flask, request, make_response, jsonify
-from models import db, Doc, Patient, PatientRecord
+from models import db, Doc, Patient, PatientRecord, MedicalRecord
 from flask_restful import Api, Resource
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from datetime import datetime
 import os
 
 
@@ -207,6 +208,68 @@ class MedSummaryInfo(Resource):
             return jsonify(summary)
         return {'message': 'Patient not found'}, 404
 api.add_resource(MedSummaryInfo, '/medsummaryinfo/<patient_id>')
+
+class MedRec(Resource):
+    @jwt_required()
+    def post(self):
+
+        Hospital = request.form.get('Hospital')
+        PatientName = request.form.get('PatientName')
+        DrName = request.form.get('DrName')
+        Date = request.form.get('Date')
+        medical_record = request.files.get('file')
+        patientID = request.form.get('PatientID')
+
+        if not medical_record:
+            return "please select record", 400
+        
+        date = datetime.strptime(Date, '%Y-%m-%d').date()
+        
+        new_record = MedicalRecord(
+            HospitalName = Hospital,
+            PatientName = PatientName,
+            DoctorName = DrName,
+            Date = date,
+            MedicalReport = medical_record.read(),
+            PatientId = patientID
+        )
+
+        db.session.add(new_record)
+        db.session.commit()
+
+        return "Medical Record added succssfully", 201
+    
+api.add_resource(MedRec, '/add')
+
+class PatientRecords(Resource):
+    @jwt_required()
+    def get(self, patient_id):
+        try:
+            records = MedicalRecord.query.filter_by(PatientId=patient_id).all()
+            
+            if not records:
+                return {"message": "No records found for this patient"}, 404
+            
+            records_data = []
+            for record in records:
+                record_data = {
+                    "id": record.id,
+                    "hospital_name": record.HospitalName,
+                    "patient_name": record.PatientName,
+                    "doctor_name": record.DoctorName,
+                    "date": record.Date.isoformat() if record.Date else None,
+                    "has_file": bool(record.MedicalReport)
+                }
+                records_data.append(record_data)
+            
+            return jsonify(records_data)
+        
+        except Exception as e:
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(PatientRecords, '/records/<int:patient_id>')
+
+
 
 if __name__ == '__main__':
     app.run(port=4040, debug=True)

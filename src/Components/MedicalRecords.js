@@ -1,68 +1,108 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const MedicalRecords =() =>  {
+const MedicalRecords = ({ selectedPatient }) => {
     const [showModal, setShowModal] = useState(false);
     const [patientRecords, setPatientRecords] = useState({
-        Hospital:'',
-        PatientName:'',
+        Hospital: '',
+        PatientName: '',
         DrName: '',
-        Date:'',
-    })
+        Date: '',
+    });
+    const [file, setFile] = useState(null);
+    const [records, setRecords] = useState([]);
+
+    useEffect(() => {
+        if (selectedPatient) {
+            fetchRecords();
+            setPatientRecords(prevState => ({
+                ...prevState,
+                PatientName: selectedPatient.name
+            }));
+        }
+    }, [selectedPatient]);
+
+    const fetchRecords = async () => {
+        if (!selectedPatient) return;
+        try {
+            const response = await axios.get(`http://127.0.0.1:4040/records/${selectedPatient.id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`
+                }
+            });
+            setRecords(response.data);
+        } catch (error) {
+            console.error('Error fetching records:', error);
+        }
+    };
 
     const handleChange = (e) => {
         setPatientRecords({ ...patientRecords, [e.target.name]: e.target.value });
-      };
-      const [file, setFile] = useState(null);
+    };
 
-      const handleFileChange = (e) => {
+    const handleFileChange = (e) => {
         setFile(e.target.files[0]);
     };
 
-  return (
-    <div className='justify-center flex  w-full'>
-        
-        <div className='flex flex-col justify-center w-4/5 mt-5'>
-        <div className='flex justify-center mb-5'>
-            <button className='bg-oxford-blue hover:bg-mikado-yellow text-white p-2 rounded-md font-semibold' onClick={() => setShowModal(true)}>Add Diagnosis Report</button>
-        </div>
-        <div className='bg-white flex justify-center gap-10 mb-5  p-5 rounded-md shadow-md font-semibold'>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Aga Khan Hospital</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>John Doe</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. Karuga Mbugua</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: 12-07-2024</h1>
-            <buttton className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'>Download Record</buttton>
-        </div>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedPatient) {
+            console.error('No patient selected');
+            return;
+        }
 
-        <div className='bg-white flex justify-center gap-10 mb-5 p-5 rounded-md shadow-md font-semibold'>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Mp Shah Hospital</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>John Doe</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. Karuga Mbugua</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: 12-07-2024</h1>
-            <buttton className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'>Download Record</buttton>
-        </div>
+        const formData = new FormData();
+        formData.append('Hospital', patientRecords.Hospital);
+        formData.append('PatientName', selectedPatient.name);
+        formData.append('DrName', patientRecords.DrName);
+        formData.append('Date', patientRecords.Date);
+        formData.append('PatientID', selectedPatient.id);
+        if (file) {
+            formData.append('file', file);
+        }
 
-        <div className='bg-white flex justify-center gap-10 mb-5 p-5 rounded-md shadow-md font-semibold'>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Aga Khan Hospital</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>John Doe</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. Karuga Mbugua</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: 12-07-2024</h1>
-            <buttton className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'>Download Record</buttton>
-        </div>
+        try {
+            const response = await axios.post('http://127.0.0.1:4040/add', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`
+                },
+            });
+            console.log(response.data);
+            setShowModal(false);
+            fetchRecords();  // Refresh the list of records
+        } catch (error) {
+            console.error('Error adding medical record:', error);
+        }
+    };
 
-        <div className='bg-white flex justify-center gap-10 mb-5 p-5 rounded-md shadow-md font-semibold'>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Aga Khan Hospital</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>John Doe</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. Karuga Mbugua</h1>
-            <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: 12-07-2024</h1>
-            <buttton className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'>Download Record</buttton>
-        </div>
-       </div>
+    if (!selectedPatient) {
+        return <div>Please select a patient</div>;
+    }
+
+    return (
+        <div className='justify-center flex w-full'>
+            <div className='flex flex-col justify-center w-4/5 mt-5'>
+                <div className='flex justify-center mb-5'>
+                    <button className='bg-oxford-blue hover:bg-mikado-yellow text-white p-2 rounded-md font-semibold' onClick={() => setShowModal(true)}>Add Diagnosis Report</button>
+                </div>
+                {records.map((record) => (
+                    <div key={record.id} className='bg-white flex justify-center gap-10 mb-5 p-5 rounded-md shadow-md font-semibold'>
+                        <h1 className='mr-5 ml-5 pt-2 pb-2'>{record.hospital_name}</h1>
+                        <h1 className='mr-5 ml-5 pt-2 pb-2'>{record.patient_name}</h1>
+                        <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. {record.doctor_name}</h1>
+                        <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: {record.date}</h1>
+                        <button className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'>Download Record</button>
+                    </div>
+                ))}
+            </div>
+      
 
        {showModal && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">
                     <div className="bg-white p-5 rounded-lg shadow-xl w-1/2">
                         <h2 className="text-xl mb-4 font-bold">Add Medical Diagnosis/Report</h2>
-                        <form >
+                        <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="Hospital">
                                     Hospital Name
