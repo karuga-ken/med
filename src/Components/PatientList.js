@@ -140,32 +140,32 @@ function PatientList() {
             </div>
           )}
 
-          {patients.map((patient) => patient &&(
-            <div key={patient.id} className='bg-white mb-5 mr-5 ml-5 rounded-md cursor-pointer' onClick={() => handlePatientClick(patient)}>
-              
-                <div className='flex gap-20 align-center'>
-                  <div className='pl-16'>
-                    <h1 className='font-semibold pl-10' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "5rem", color: '' }}>
-                      <FontAwesomeIcon icon={faUserTie} />
-                    </h1>
-                  </div>
-                  <div className='pt-5'>
-                    <p className='font-semibold'>{patient.name}</p>
-                    <p>D.O.B: {new Date(patient.date_of_birth * 1000).toLocaleDateString()}</p>
-                    <p>{patient.age} y/o</p>
-                  </div>
-                  <div className='pt-5 mr-32'>
-                    <p>Health ID: <span className='font-semibold'>{patient.national_id}</span></p>
-                    <h1>Last Appointment: {new Date(patient.last_appointment * 1000).toLocaleDateString()}</h1>
-                  </div>
-                  <div className='pt-8 ml-44'>
-                    <button className='rounded-md font-semibold bg-mikado-yellow text-xl text-white p-2 pl-5 pr-5' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem", color: '' }}>
-                      <FontAwesomeIcon icon={faPhone} /> Call
-                    </button>
-                  </div>
-                </div>
-            </div>
-          ))}
+{patients.map((patient) => patient && (
+  <div key={patient.id} className='bg-white mb-5 mr-5 ml-5 rounded-md cursor-pointer' onClick={() => handlePatientClick(patient)}>
+    <div className='flex gap-20 align-center'>
+      <div className='pl-16'>
+        <h1 className='font-semibold pl-10' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "5rem", color: '' }}>
+          <FontAwesomeIcon icon={faUserTie} />
+        </h1>
+      </div>
+      <div className='pt-5'>
+        <p className='font-semibold'>{patient.name}</p>
+        <p>D.O.B: {patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</p>
+        
+      </div>
+      <div className='pt-5 mr-32'>
+        <p>Health ID: <span className='font-semibold'>{patient.national_id}</span></p>
+        <p>Age: {patient.age} y/o</p>
+        {/* <h1>Last Appointment: {patient.last_appointment ? new Date(patient.last_appointment * 1000).toLocaleDateString() : 'N/A'}</h1> */}
+      </div>
+      <div className='pt-8 ml-44'>
+        <button className='rounded-md font-semibold bg-mikado-yellow text-xl text-white p-2 pl-5 pr-5' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem", color: '' }}>
+          <FontAwesomeIcon icon={faPhone} /> Call
+        </button>
+      </div>
+    </div>
+  </div>
+))}
 
           {/* Modal for Adding New Patient */}
           {showModal && (

@@ -21,14 +21,16 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     national_id = db.Column(db.Integer, unique=True)
     name = db.Column(db.String)
-    date_of_birth = db.Column(db.Integer)
-    age = db.Column(db.Integer)
-    last_appointment = db.Column(db.Integer)
+    date_of_birth = db.Column(db.Date, nullable=True)
+    age = db.Column(db.Integer, nullable=True)
+    last_appointment = db.Column(db.Integer, nullable=True)
+    password = db.Column(db.String, nullable=True)
+    email = db.Column(db.String, nullable=True, unique=True)
     records = db.relationship('PatientRecord', backref='patient', lazy=True)
     medrec = db.relationship('MedicalRecord', backref='patient', lazy=True)
 
     def __repr__(self):
-        return f'{self.id}, {self.name}, {self.date_of_birth}, {self.age}, {self.last_appointment}'
+        return f'{self.id}'
 
 class PatientRecord(db.Model):
     __tablename__ = 'medinfo'

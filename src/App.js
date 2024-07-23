@@ -11,6 +11,9 @@ import ForgotPassword from './Components/ForgotPassword'
 import DoctorsDashboard from './Components/DoctorsDashboard'
 import PatientList from './Components/PatientList'
 import PatientPage from './Components/PatientPage'
+import PatientDashboard from './Components/PatientDashboard'
+import PatientSignup from './Components/PatientSignup'
+import PatientSignin from './Components/PatientSignin'
 
 function App() {
   return (
@@ -74,6 +77,25 @@ function App() {
           <MedicalRecords/>
           </>
         }></Route> */}
+
+        <Route path = '/patient-access' element={
+          <>
+          <PatientSignup/>
+          </>
+          
+        }>
+        </Route>
+
+        <Route path = '/patient-signin' 
+        element={
+          <PatientSignin/>
+        }></Route>
+
+        <Route path='/patient-dashboard' element={
+          <>
+          <PatientDashboard/>
+          </>
+        }></Route>
       </Routes>
     </Router>
 

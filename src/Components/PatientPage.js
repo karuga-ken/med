@@ -119,13 +119,13 @@ function PatientPage() {
 
                     <div className='pt-5'>
                         <p className='font-semibold'>Name: {patient.name || 'nill'}</p>
-                        <p>D.O.B: {patient.date_of_birth ? new Date(patient.date_of_birth * 1000).toLocaleDateString() : 'N/A'}</p>
-                        <p>Age: {patient.age ? `${patient.age} y/o` : 'Age not available'}</p>
+                        <p>D.O.B: {patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</p>
+                        
                     </div>
 
                     <div className='pt-5 mr-32'>
                         <p>Health ID: <span className='font-semibold'>{patient.national_id}</span></p>
-                        <h1>Last Appointment: {patient.last_appointment ? new Date(patient.last_appointment * 1000).toLocaleDateString() : 'N/A'}</h1>
+                        <p>Age: {patient.age ? `${patient.age} Year(s) Old` : 'Age not available'}</p>
                     </div>
 
                     <div className='pt-8 pb-8 ml-20 flex p-2'>

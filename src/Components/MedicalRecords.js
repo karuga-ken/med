@@ -76,6 +76,29 @@ const MedicalRecords = ({ selectedPatient }) => {
         }
     };
 
+    const downloadMedicalRecord = async (recordId) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:4040/api/medical-records/${recordId}/download`, {
+                responseType: 'blob',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`
+                }
+            });
+            
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `medical_record_${recordId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading medical record:', error);
+        }
+    };
+
     if (!selectedPatient) {
         return <div>Please select a patient</div>;
     }
@@ -92,7 +115,9 @@ const MedicalRecords = ({ selectedPatient }) => {
                         <h1 className='mr-5 ml-5 pt-2 pb-2'>{record.patient_name}</h1>
                         <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. {record.doctor_name}</h1>
                         <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: {record.date}</h1>
-                        <button className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'>Download Record</button>
+                        <button className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'
+                            onClick={() => downloadMedicalRecord(record.id)}
+                        >Download Record</button>
                     </div>
                 ))}
             </div>

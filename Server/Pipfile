@@ -11,6 +11,8 @@ flask-restful = "*"
 flask-migrate = "*"
 flask-cors = "*"
 flask-jwt-extended = "*"
+pypdf2 = "*"
+reportlab = "*"
 
 [dev-packages]
 
