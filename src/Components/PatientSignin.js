@@ -5,20 +5,20 @@ import { useNavigate } from 'react-router-dom';
 
 function PatientSignin() {
 
-  const [email, setEmail] = useState('');
+  const [national, setNational] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (email && password){
+    if (national && password){
       try{
-        const response = await fetch('http://127.0.0.1:4040/auth/login', {
+        const response = await fetch('http://127.0.0.1:4040/auth/patientlogin', {
           method: 'POST',
           headers:{
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({email, password})
+          body: JSON.stringify({national, password})
         });
         if (!response.ok){
           const errorData = await response.json();
@@ -29,7 +29,7 @@ function PatientSignin() {
         const accessToken = responseData.accessToken
         localStorage.setItem('access_token', accessToken)
         alert('log in successful')
-        navigate('/doc')
+        navigate('/patient-dashboard')
       }
       catch (error){
         alert(error.message)
@@ -50,7 +50,7 @@ function PatientSignin() {
             <h3 className='text-2xl text-gray-500 mb-5'>or</h3>
         </div>
         <form onSubmit={handleSubmit} className='flex flex-col sm:mx-64 '>
-            <input type='email' required placeholder='Email Address' value={email} onChange={(e) => setEmail(e.target.value)} className='text-center mx-64 mb-5  border bg-transparent font-bold placeholder-white border-gray-400 p-2'/>
+            <input type='text' required placeholder='Enter National ID' value={national} onChange={(e) => setNational(e.target.value)} className='text-center mx-64 mb-5  border bg-transparent font-bold placeholder-white border-gray-400 p-2'/>
             <input type='password' required placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} className='text-center mx-64 mb-5  border bg-transparent font-bold placeholder-white border-gray-400 p-2'/>
             <button type='submit' required className='bg-blue-500 mx-64 hover:bg-gold mb-5 p-2 text-white text-xl'>LOGIN</button>
             <p className='flex justify-center mb-20 font-bold text-xl'><Link to ="/forgot-password">Forgot Password?</Link> </p>

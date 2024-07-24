@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response, jsonify, send_file
+from flask import Flask, request, make_response, jsonify, send_file, abort
 from models import db, Doc, Patient, PatientRecord, MedicalRecord
 from flask_restful import Api, Resource
 from flask_migrate import Migrate
@@ -333,7 +333,7 @@ class MedicalRecordDownload(Resource):
         
         try:
             # Create a watermark
-            watermark = self.create_watermark("Downloaded From MediHub")
+            watermark = self.create_watermark("Doctor's Portal Download")
 
             # Read the original PDF
             existing_pdf = PdfReader(BytesIO(record.MedicalReport))
@@ -412,7 +412,8 @@ class PatientSign(Resource):
         db.session.commit()
 
         access_token_payload = {
-            "doc_id": new_patient.id
+            "patient_id": new_patient.id,
+            "patient_name": new_patient.name
         }
 
         #generate a token containing the payload
@@ -432,6 +433,139 @@ class PatientSign(Resource):
         return response
 api.add_resource(PatientSign, "/patientsignup")
 
+class PatientLogin(Resource):
+    def post (self):
+
+        national = request.json['national']
+        password = request.json['password']
+
+        patient_exists = Patient.query.filter(Patient.national_id == national).first()
+        if patient_exists is None:
+            response = make_response(
+                jsonify({
+                    "error": "Account not found"
+                }), 401
+            )
+            return response
+        password_exists = Patient.query.filter(Patient.password == password).first()
+
+        if password_exists is None:
+            response = make_response(
+                jsonify({
+                    "error": 'Wrong credentials'
+                }), 401
+            )
+            return response
+        
+        access_token_payload = {
+            "message": "login successful",
+            "patient_id": patient_exists.id,
+            "doc_name": patient_exists.name,
+        }
+
+        access_token = create_access_token(identity = access_token_payload)
+
+        response_data = {
+            "message": "login successful",
+            'accessToken': access_token
+        }
+        response = make_response(
+            jsonify(response_data), 201
+        )
+        response.headers['Authorization'] = f'Bearer {access_token}'
+        return response
+api.add_resource(PatientLogin, "/auth/patientlogin")
+
+class PatientMedrec(Resource):
+    @jwt_required()
+    def get(self):
+
+        current_patient = get_jwt_identity()["patient_id"]
+
+        patientrecords = MedicalRecord.query.filter(current_patient == MedicalRecord.PatientId).all()
+
+        if patientrecords is None:
+            return jsonify({
+                "message": "You have No records!"
+            })
+        records_list = []
+        for patientrecord in patientrecords:
+            patient_data = {
+                "id": patientrecord.id,
+                "hospital_name": patientrecord.HospitalName,
+                "doctor_name": patientrecord.DoctorName,
+                "date": patientrecord.Date.isoformat() if patientrecord.Date else None,
+                "has_file": bool(patientrecord.MedicalReport)
+            }
+            records_list.append(patient_data)
+        return jsonify(records_list)
+        
+api.add_resource(PatientMedrec, '/patrecords')
+
+
+class MedicalReportDownload(Resource):
+    @jwt_required()
+    def get(self, record_id):
+        current_patient = get_jwt_identity()["patient_id"]
+        
+        # Fetch the record
+        record = MedicalRecord.query.filter_by(id=record_id, PatientId=current_patient).first()
+        
+        if not record:
+            abort(404, description="Record not found or you don't have permission to access it.")
+        
+        if not record.MedicalReport:
+            abort(404, description="No medical report file found for this record.")
+        
+        try:
+            # Create a watermark
+            watermark = self.create_watermark("Patient Portal Download")
+
+            # Read the original PDF
+            existing_pdf = PdfReader(BytesIO(record.MedicalReport))
+            output = PdfWriter()
+
+            # Add the watermark to each page
+            for i in range(len(existing_pdf.pages)):
+                page = existing_pdf.pages[i]
+                page.merge_page(watermark.pages[0])
+                output.add_page(page)
+
+            # Save the result to a memory buffer
+            buffer = BytesIO()
+            output.write(buffer)
+            buffer.seek(0)
+            
+            # Generate a filename
+            filename = f"medical_report_{record.id}.pdf"
+            
+            return send_file(
+                buffer,
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=filename
+            )
+        except Exception as e:
+            print(f"Error processing PDF: {str(e)}")
+            return {"message": "Error processing PDF"}, 500
+
+    @staticmethod
+    def create_watermark(text):
+        packet = BytesIO()
+        can = canvas.Canvas(packet, pagesize=letter)
+        can.setFont("Helvetica", 20)
+        can.setFillColorRGB(0.5, 0.5, 0.5, 0.3)  # Gray color with 30% opacity
+        can.saveState()
+        can.translate(300, 400)
+        can.rotate(45)
+        can.drawCentredString(0, 0, text)
+        can.restoreState()
+        can.save()
+        packet.seek(0)
+        return PdfReader(packet)
+
+# Add the resource to your API
+api.add_resource(MedicalReportDownload, '/download_report/<int:record_id>')
 
 if __name__ == '__main__':
     app.run(port=4040, debug=True)
