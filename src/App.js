@@ -14,6 +14,8 @@ import PatientPage from './Components/PatientPage'
 import PatientDashboard from './Components/PatientDashboard'
 import PatientSignup from './Components/PatientSignup'
 import PatientSignin from './Components/PatientSignin'
+import Appointments from './Components/Appointments'
+import PatientAppointments from './Components/PatientAppointments'
 
 function App() {
   return (
@@ -96,6 +98,14 @@ function App() {
           <PatientDashboard/>
           </>
         }></Route>
+
+        <Route path="/appointments" element={<>
+        <Appointments/>
+        </>}></Route>
+
+        <Route path='/book' element={<>
+          <PatientAppointments/>
+        </>}></Route>
       </Routes>
     </Router>
 

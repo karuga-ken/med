@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserTie, faCalendar, faClock, faBan} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 function PatientDashboard() {
 
@@ -61,7 +62,10 @@ function PatientDashboard() {
     <div className='bg-gray-100 h-screen'>
     <div className='bg-oxford-blue text-white font-semibold text-xl flex p-4 '>
         <h1 className='w-9/12 ml-12' style={{letterSpacing:'5px'}}>MediPlus</h1>
-        <h1 className='mr-2' style={{letterSpacing:'5px'}}><FontAwesomeIcon icon={faUserTie} /> Packard</h1>
+        {/* <h1 className='mr-2' style={{letterSpacing:'5px'}}><FontAwesomeIcon icon={faUserTie} /> Packard</h1> */}
+        <Link to="/book">
+          <button className=' ml-2 pl-2 pr-2 rounded-md hover:text-white hover:bg-blue-400'>Book Appointment</button>
+        </Link>
         <button className='bg-red-600 ml-2 pl-2 pr-2 rounded-md hover:text-white hover:bg-oxford-blue'>LogOut</button>
     </div>
 

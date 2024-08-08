@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import LargeBinary
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -11,6 +12,7 @@ class Doc(db.Model):
     name = db.Column(db.String)
     email = db.Column(db.String, unique=True)
     password = db.Column(db.String)
+    appointments = db.relationship('Appointment', backref='doctor', lazy=True)
 
     def __repr__(self):
         return f'{self.id}, {self.name}, {self.email}, {self.password}'
@@ -28,6 +30,7 @@ class Patient(db.Model):
     email = db.Column(db.String, nullable=True, unique=True)
     records = db.relationship('PatientRecord', backref='patient', lazy=True)
     medrec = db.relationship('MedicalRecord', backref='patient', lazy=True)
+    appointments = db.relationship('Appointment', backref='patient', lazy=True)
 
     def __repr__(self):
         return f'{self.id}'
@@ -59,4 +62,32 @@ class MedicalRecord(db.Model):
 
     def __repr__(self):
         return f'{self.id}, {self.HospitalName}, {self.PatientName}, {self.DoctorName}, {self.Date}, {self.MedicalReport}'
+    
+# class Appointment(db.Model):
+#     __tablename__ = 'appointments'
 
+#     id = db.Column(db.Integer, primary_key=True)
+#     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+#     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+#     date = db.Column(db.String, nullable=False)
+#     time = db.Column(db.String, nullable=False)
+#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+#     def __repr__(self):
+#         return f'<Appointment {self.id}>'
+
+    
+
+class Appointment(db.Model):
+
+    __tablename__ = 'appointments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.String(5), nullable=False)  # Change to String
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Appointment {self.id}>'

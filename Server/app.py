@@ -1,17 +1,17 @@
 from flask import Flask, request, make_response, jsonify, send_file, abort
-from models import db, Doc, Patient, PatientRecord, MedicalRecord
+from models import db, Doc, Patient, PatientRecord, MedicalRecord, Appointment
 from flask_restful import Api, Resource
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 import os
 import io
-
+from dateutil import parser
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///med.db'
@@ -20,6 +20,7 @@ db.init_app(app)
 migrate = Migrate(app,db)
 jwt=JWTManager(app)
 CORS(app)
+CORS(app, resources={r"/addappointment": {"origins": "http://localhost:3000"}})  # Allow specific origin
 app.config['JWT_SECRET_KEY'] = os.urandom(24).hex()
 
 class RegisterDoc(Resource):
@@ -554,7 +555,7 @@ class MedicalReportDownload(Resource):
         packet = BytesIO()
         can = canvas.Canvas(packet, pagesize=letter)
         can.setFont("Helvetica", 20)
-        can.setFillColorRGB(0.5, 0.5, 0.5, 0.3)  # Gray color with 30% opacity
+        can.setFillColorRGB(0.5, 0.5, 0.5, 0.3) 
         can.saveState()
         can.translate(300, 400)
         can.rotate(45)
@@ -564,8 +565,140 @@ class MedicalReportDownload(Resource):
         packet.seek(0)
         return PdfReader(packet)
 
-# Add the resource to your API
 api.add_resource(MedicalReportDownload, '/download_report/<int:record_id>')
+
+class GetDocs(Resource):
+    def get(self):
+        doctors = Doc.query.all()
+        return([{'id':doc.id, 'name': doc.name}for doc in  doctors])
+api.add_resource(GetDocs, '/searchdoc')
+
+
+class AddAppointment(Resource):
+    @jwt_required()
+    def post(self):
+        try:
+            logged_in_user = get_jwt_identity().get('patient_id')
+            data = request.get_json()  
+
+            if not all(d in data for d in ('doctorId', 'date', 'time')):
+                return jsonify({"message": "Missing data"}), 400
+
+            doctor_id = int(data.get('doctorId'))  # Convert to integer
+            date_str = data.get('date')
+            time_str = data.get('time')
+
+            # Validate and convert date and time
+            try:
+                date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                time = datetime.strptime(time_str, '%H:%M').strftime('%H:%M')  # Convert time to string
+            except ValueError as ve:
+                return jsonify({"message": f"Invalid date/time format: {ve}"}), 400
+
+            # Check if the appointment already exists
+            existing_appointment = Appointment.query.filter_by(
+                doctor_id=doctor_id,
+                date=date,
+                time=time,  
+                patient_id=logged_in_user
+            ).first()
+
+            if existing_appointment:
+                return jsonify({"message": "Appointment already exists"}), 422
+
+            new_appointment = Appointment(
+                doctor_id=doctor_id,
+                patient_id=logged_in_user,
+                date=date,
+                time=time 
+            )
+
+            db.session.add(new_appointment)
+            db.session.commit()
+
+            response_data = {
+                'id': new_appointment.id,
+                'doctorId': new_appointment.doctor_id,
+                'doctorName': new_appointment.doctor.name,
+                'start': datetime.combine(new_appointment.date, datetime.strptime(new_appointment.time, '%H:%M').time()).isoformat(),
+                'end': (datetime.combine(new_appointment.date, datetime.strptime(new_appointment.time, '%H:%M').time()) + timedelta(hours=1)).isoformat()
+            }
+
+            return jsonify(response_data), 201
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error adding appointment: {e}")
+            return jsonify({"message": f"Error adding appointment: {e}"}), 500
+api.add_resource(AddAppointment, '/addappointment')
+
+class BookedAppointment(Resource):
+    @jwt_required()
+    def get(self):
+        try:
+            logged_in_user = get_jwt_identity()
+            patient_id = logged_in_user['patient_id']
+
+            appointments = db.session.query(Appointment, Doc.name).\
+                join(Doc, Appointment.doctor_id == Doc.id).\
+                filter(Appointment.patient_id == patient_id).\
+                all()
+
+            response_data = []
+
+            for appointment, doctor_name in appointments:
+                appointment_data = {
+                    'id': appointment.id,
+                    'doctorName': doctor_name,
+                    'start': datetime.combine(appointment.date, datetime.strptime(appointment.time, '%H:%M').time()).isoformat(),
+                    'end': (datetime.combine(appointment.date, datetime.strptime(appointment.time, '%H:%M').time()) + timedelta(hours=1)).isoformat()
+                }
+                response_data.append(appointment_data)
+
+            return {'appointments': response_data}, 200
+
+        except Exception as e:
+            print(f'Error retrieving appointments: {e}')
+            return jsonify({'message': f'error retrieving appointments'}), 500
+        
+api.add_resource(BookedAppointment, '/getbookedappointments')
+
+class DocAppointment(Resource):
+    @jwt_required()
+    def get(self):
+        try:
+
+            logged_in_user = get_jwt_identity()
+            logged_doc = logged_in_user['doc_id']
+
+            appointments = db.session.query(Appointment, Patient.name).\
+                    join(Patient, Appointment.patient_id == Patient.id).\
+                    filter(Appointment.doctor_id == logged_doc).\
+                    all()
+
+            response_data = []
+
+            for appointment, patient_name in appointments:
+                    appointment_data = {
+                        'id': appointment.id,
+                        'doctorName': patient_name,
+                        'start': datetime.combine(appointment.date, datetime.strptime(appointment.time, '%H:%M').time()).isoformat(),
+                        'end': (datetime.combine(appointment.date, datetime.strptime(appointment.time, '%H:%M').time()) + timedelta(hours=1)).isoformat()
+                    }
+                    response_data.append(appointment_data)
+
+            return {'appointments': response_data}, 200
+        
+        except Exception as e:
+            print(f'Error retrieving appointments: {e}')
+            return jsonify({'message': f'error retrieving appointments'}), 500
+    
+api.add_resource(DocAppointment, '/patientappointments')
+        
+    
+
+
+        
 
 if __name__ == '__main__':
     app.run(port=4040, debug=True)
