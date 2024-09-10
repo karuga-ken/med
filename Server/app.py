@@ -15,6 +15,7 @@ from dateutil import parser
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///med.db'
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///med.db')
 api=Api(app)
 db.init_app(app)
 migrate = Migrate(app,db)

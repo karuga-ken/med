@@ -16,6 +16,7 @@ reportlab = "*"
 pillow = "*"
 python-dateutil = "*"
 dateutils = "*"
+gunicorn = "*"
 
 [dev-packages]
 
