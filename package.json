@@ -8,7 +8,6 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@material-ui/core": "^4.12.4",
     "@mui/material": "^5.16.7",
     "@mui/x-date-pickers": "^7.5.1",
     "@testing-library/jest-dom": "^5.17.0",
@@ -25,9 +24,8 @@
     "web-vitals": "^2.1.4"
   },
   "engines": {
-  "node": "20.x"
-},
-
+    "node": "20.x"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
