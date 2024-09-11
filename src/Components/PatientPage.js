@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarCheck, faFileLines, faFolderOpen, faHeartPulse, faUserTie, faRightFromBracket, faBell, faPhone} from '@fortawesome/free-solid-svg-icons';
+import { faCalendarCheck, faFileLines, faTimes, faBars, faFolderOpen, faHeartPulse, faUserTie, faRightFromBracket, faBell, faPhone} from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom'
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -8,6 +8,7 @@ import MedicalRecords from './MedicalRecords';
 
 
 function PatientPage() {
+    const [isOpen, setIsOpen] = useState(false); // State to handle navbar visibility
     const location = useLocation();
     const patient = location.state?.patient;
     const [showModal, setShowModal] = useState(false);
@@ -80,6 +81,10 @@ function PatientPage() {
         return <div>No data</div>
     }
 
+    const toggleNavbar = () => {
+        setIsOpen(!isOpen);
+      };
+
     
 
     
@@ -89,7 +94,12 @@ function PatientPage() {
     <div>
 
         <div className='flex bg-gray-200'>
-        <div className='bg-oxford-blue  w-1/4 flex flex-col gap-5 '>
+        <div
+            className={`bg-oxford-blue sm:w-1/4 flex flex-col gap-5 fixed top-0 left-0 h-full z-40 transition-transform duration-300 ${
+              isOpen ? 'translate-x-0' : '-translate-x-full'
+            } sm:relative sm:translate-x-0 sm:block`}
+            
+          >
            <div className='flex-start justify-center p-4 pl-10 mb-10'>
                <h1 className='w-9/12 font-bold text-white text-2xl' style={{letterSpacing:'8px'}}><FontAwesomeIcon className='' icon={faFolderOpen} /> MediPlus</h1>
            </div>
@@ -111,33 +121,42 @@ function PatientPage() {
        
 
         <div className='mt-5 m-3 w-full'>
-            <div className='bg-white mb-5 rounded-md cursor-pointer'>
-                <div className='flex gap-20 align-center'>
-                    <div className='pl-16'>
-                    <h1 className=' font-semibold pl-10' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "5rem", color:'' }}><FontAwesomeIcon icon={faUserTie} /> </h1>
+        
+            <div className='bg-white mb-5 rounded-md cursor-pointer flex flex-col items-center justify-center'>
+            <div className='w-full flex justify-end rounded-md'>
+      <button
+        onClick={toggleNavbar}
+        className='sm:hidden flex p-1 rounded-md sm:text-2xl text-white bg-oxford-blue ml-auto'>
+        <FontAwesomeIcon icon={isOpen ? faTimes : faBars} />
+      </button>
+    </div>
+            
+                <div className='sm:flex sm:gap-20 align-center'>
+                    <div className='sm:pl-16'>
+                    <h1 className=' font-semibold pl-10 text-center' style={{ fontSize: window.innerWidth < 768 ? "2rem" : "5rem", color:'' }}><FontAwesomeIcon icon={faUserTie} /> </h1>
                     </div>
 
                     <div className='pt-5'>
-                        <p className='font-semibold'>Name: {patient.name || 'nill'}</p>
-                        <p>D.O.B: {patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</p>
+                        <p className='font-semibold text-center'>Name: {patient.name || 'nill'}</p>
+                        <p className='text-center'>D.O.B: {patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</p>
                         
                     </div>
 
-                    <div className='pt-5 mr-32'>
-                        <p>Health ID: <span className='font-semibold'>{patient.national_id}</span></p>
-                        <p>Age: {patient.age ? `${patient.age} Year(s) Old` : 'Age not available'}</p>
+                    <div className='pt-5 sm:mr-32'>
+                        <p className='text-center'>Health ID: <span className='font-semibold'>{patient.national_id}</span></p>
+                        <p className='text-center'>Age: {patient.age ? `${patient.age} Year(s) Old` : 'Age not available'}</p>
                     </div>
 
-                    <div className='pt-8 pb-8 ml-20 flex p-2'>
+                    <div className='pt-8 pb-8 sm:ml-20 flex p-2'>
                         <button className='rounded-md mt-2 mb-2  font-semibold bg-mikado-yellow text-xl text-white p-2 pl-2 pr-2' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem", color:'' }}><FontAwesomeIcon icon={faPhone} /> Call</button>
                         <button onClick={() => setShowModal(true)} className='rounded-md m-2  font-semibold bg-mikado-yellow text-xl text-white p-2 pl-2 pr-2 hover:bg-oxford-blue' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem", color:'' }}><FontAwesomeIcon icon={faFileLines} /> Add Medical Info</button>
                     </div>
                 </div>
             </div>
 
-            <div className='flex gap-5 pl-20 mt-10 font-semibold flex justify-center'>
+            <div className='flex gap-5 pl-12 mt-10 font-semibold flex justify-center'>
                 <h1 
-                    className={`mr-12 cursor-pointer ${activeSection === 'summary' ? 'border-b-mikado-yellow' : ''} border-4 border-gray-200 p-2`}
+                    className={`sm:mr-12 cursor-pointer ${activeSection === 'summary' ? 'border-b-mikado-yellow' : ''} border-4 border-gray-200 sm:p-2`}
                     onClick={() => setActiveSection('summary')}
                 >
                     Summarized Medical Info
@@ -177,7 +196,7 @@ function PatientPage() {
 
         <div className='bg-white w-1/3 p-2 shadow-md rounded-md' style={{height:'300px'}}>
             <div className='font-semibold'>
-                <h1>Medications/Prescriptions</h1>
+                <h1>Medications / Prescriptions</h1>
             </div>
             <div className='p-4 flex flex-wrap'>
                 {medSummary.Prescriptions && medSummary.Prescriptions.split(',').map((prescription, index) => (

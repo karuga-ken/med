@@ -104,23 +104,33 @@ const MedicalRecords = ({ selectedPatient }) => {
     }
 
     return (
-        <div className='justify-center flex w-full'>
-            <div className='flex flex-col justify-center w-4/5 mt-5'>
-                <div className='flex justify-center mb-5'>
-                    <button className='bg-oxford-blue hover:bg-mikado-yellow text-white p-2 rounded-md font-semibold' onClick={() => setShowModal(true)}>Add Diagnosis Report</button>
-                </div>
-                {records.map((record) => (
-                    <div key={record.id} className='bg-white flex justify-center gap-10 mb-5 p-5 rounded-md shadow-md font-semibold'>
-                        <h1 className='mr-5 ml-5 pt-2 pb-2'>{record.hospital_name}</h1>
-                        <h1 className='mr-5 ml-5 pt-2 pb-2'>{record.patient_name}</h1>
-                        <h1 className='mr-5 ml-5 pt-2 pb-2'>Dr. {record.doctor_name}</h1>
-                        <h1 className='mr-5 ml-5 pt-2 pb-2'>Date: {record.date}</h1>
-                        <button className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'
-                            onClick={() => downloadMedicalRecord(record.id)}
-                        >Download Record</button>
-                    </div>
-                ))}
-            </div>
+        <div className=' sm:flex justify-center w-full'>
+            <div className='sm:flex flex-col sm:w-4/5 mt-5'>
+    <div className='flex justify-center mb-5'>
+      <button className='bg-oxford-blue hover:bg-mikado-yellow text-white p-2 rounded-md font-semibold' onClick={() => setShowModal(true)}>
+        Add Diagnosis Report
+      </button>
+    </div>
+
+    {records.map((record) => (
+      <div key={record.id} className='bg-white sm:flex justify-center items-center gap-10 mb-5 p-5 rounded-md shadow-md font-semibold'>
+        <div className='flex flex-col sm:flex-row justify-center items-center w-full'>
+          <h1 className='text-center sm:text-left sm:mr-5 sm:ml-5 pt-2 pb-2'>{record.hospital_name}</h1>
+          <h1 className='text-center sm:text-left sm:mr-5 sm:ml-5 pt-2 pb-2'>{record.patient_name}</h1>
+          <h1 className='text-center sm:text-left sm:mr-5 sm:ml-5 pt-2 pb-2'>Dr. {record.doctor_name}</h1>
+          <h1 className='text-center sm:text-left sm:mr-5 sm:ml-5 pt-2 pb-2'>Date: {record.date}</h1>
+        </div>
+        <div className='flex justify-center'>
+          <button 
+            className='bg-oxford-blue hover:bg-mikado-yellow cursor-pointer text-white p-2 rounded-md'
+            onClick={() => downloadMedicalRecord(record.id)}
+          >
+            Download Record
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
       
 
        {showModal && (

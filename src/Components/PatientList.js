@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarCheck, faFileLines, faFolderOpen, faHeartPulse, faUserTie, faRightFromBracket, faBell, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarCheck, faFileLines, faFolderOpen, faBars, faTimes, faHeartPulse, faUserTie, faRightFromBracket, faBell, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 function PatientList() {
+  const [isOpen, setIsOpen] = useState(false); // State to handle navbar visibility
   const [showModal, setShowModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [patients, setPatients] = useState([]);
@@ -75,10 +76,19 @@ function PatientList() {
     navigate('/patient-page', {state: {patient}});
   }
 
+  const toggleNavbar = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <>
       <div className='flex bg-gray-200'>
-        <div className='bg-oxford-blue w-1/4 flex flex-col gap-5 '>
+      <div
+            className={`bg-oxford-blue sm:w-1/4 flex flex-col gap-5 fixed top-0 left-0 h-full z-40 transition-transform duration-300 ${
+              isOpen ? 'translate-x-0' : '-translate-x-full'
+            } sm:relative sm:translate-x-0 sm:block`}
+            
+          >
           <div className='flex-start justify-center p-4 pl-10 mb-10'>
             <h1 className='w-9/12 font-bold text-white text-2xl' style={{ letterSpacing: '8px' }}>
               <FontAwesomeIcon className='' icon={faFolderOpen} /> MediPlus
@@ -111,27 +121,32 @@ function PatientList() {
         </div>
 
         <div className='w-full'>
-          <div className='p-5 flex flex-row gap-40 flex justify-center bg-white'>
-            <div className='w-2/4 text-left'>
-              <h1>Hello, Dr. Packard</h1>
-              <h1 className='text-3xl font-bold' style={{ letterSpacing: '2px' }}>Your Patient List</h1>
+          <div className='p-5 flex flex-row sm:gap-40 flex justify-center bg-white'>
+            <div className='sm:w-2/4 text-left'>
+              {/* <h1>Hello, Dr. Packard</h1> */}
+              <h1 className='sm:text-3xl font-bold p-2 text-center' style={{ letterSpacing: '2px' }}>Your Patient List</h1>
             </div>
-            <div className='flex flex-row gap-2 text-center'>
-              <p className='ml-10 p-2 font-semibold' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem" }}>
+            <div className='flex flex-row sm:gap-2 text-center'>
+              {/* <p className='ml-10 p-2 font-semibold' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem" }}>
                 <FontAwesomeIcon icon={faBell} />
-              </p>
+              </p> */}
               <p className='text-center font-semibold p-2' style={{ letterSpacing: '2px' }}>Dr. Helwett Packard</p>
-              <p className='p-2 font-semibold' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem" }}>
+              {/* <p className='p-2 font-semibold' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem" }}>
                 <FontAwesomeIcon icon={faUserTie} />
-              </p>
+              </p> */}
+               <button
+            onClick={toggleNavbar}
+            className='sm:hidden p-1 sm:text-2xl text-white bg-oxford-blue'>
+            <FontAwesomeIcon icon={isOpen ? faTimes : faBars} />
+          </button>
             </div>
           </div>
 
-          <div className='p-5 flex gap-6 pl-28 mb-5 mt-5'>
-            <input className='bg-white p-2 w-3/5 rounded-xl border-none' type='text' placeholder='Search For Patient'></input>
-            <button className='ml-28 w-1/5 bg-blue-500 rounded-md text-white' onClick={() => setShowModal(true)}>
+          <div className='p-5 flex gap-6 sm:pl-28 mb-5 mt-5'>
+            <input className='bg-white p-2 w-full rounded-xl border-none' type='text' placeholder='Search For Patient'></input>
+            {/* <button className='ml-28 w-1/5 bg-blue-500 rounded-md text-white' onClick={() => setShowModal(true)}>
               Add New Patient
-            </button>
+            </button> */}
           </div>
 
           {successMessage && (
@@ -141,31 +156,37 @@ function PatientList() {
           )}
 
 {patients.map((patient) => patient && (
-  <div key={patient.id} className='bg-white mb-5 mr-5 ml-5 rounded-md cursor-pointer' onClick={() => handlePatientClick(patient)}>
-    <div className='flex gap-20 align-center'>
-      <div className='pl-16'>
-        <h1 className='font-semibold pl-10' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "5rem", color: '' }}>
+  <div key={patient.id} className='bg-white mb-5 mx-5 flex items-center justify-between p-5 rounded-md cursor-pointer' onClick={() => handlePatientClick(patient)}>
+    <div className='sm:flex sm:items-center sm:gap-10 w-full'>
+      {/* Icon */}
+      <div className='flex justify-center items-center'>
+        <h1 className='font-semibold' style={{ fontSize: window.innerWidth < 768 ? "3rem" : "4rem" }}>
           <FontAwesomeIcon icon={faUserTie} />
         </h1>
       </div>
-      <div className='pt-5'>
-        <p className='font-semibold'>{patient.name}</p>
-        <p>D.O.B: {patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</p>
-        
+
+      {/* Patient Info */}
+      <div className='pt-2 sm:pt-0 flex flex-col justify-center items-center justify-center items-center'>
+        <p className=''><span className='font-semibold '>Name: </span> {patient.name}</p>
+        <p className=''><span className='font-semibold '>D.O.B: </span>{patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : 'N/A'}</p>
       </div>
-      <div className='pt-5 mr-32'>
+
+      {/* Health ID and Age */}
+      <div className='pt-2 sm:pt-0 flex flex-col justify-center items-center justify-center items-center'>
         <p>Health ID: <span className='font-semibold'>{patient.national_id}</span></p>
         <p>Age: {patient.age} y/o</p>
-        {/* <h1>Last Appointment: {patient.last_appointment ? new Date(patient.last_appointment * 1000).toLocaleDateString() : 'N/A'}</h1> */}
       </div>
-      <div className='pt-8 ml-44'>
-        <button className='rounded-md font-semibold bg-mikado-yellow text-xl text-white p-2 pl-5 pr-5' style={{ fontSize: window.innerWidth < 768 ? "1rem" : "1rem", color: '' }}>
+
+      {/* Call Button */}
+      <div className='pt-2 sm:pt-0 flex flex-col justify-center items-center justify-center items-center'>
+        <button className='rounded-md font-semibold bg-mikado-yellow text-xl text-white py-2 px-4'>
           <FontAwesomeIcon icon={faPhone} /> Call
         </button>
       </div>
     </div>
   </div>
 ))}
+
 
           {/* Modal for Adding New Patient */}
           {showModal && (

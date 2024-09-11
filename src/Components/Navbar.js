@@ -7,7 +7,7 @@ function Navbar() {
         <ul className='text-white flex'>
             <li className='w-9/12 font-bold text-2xl' style={{letterSpacing:'8px'}}><Link to='/'>MediHub</Link></li>
             <Link to='/access-records'>
-            <li className='font-semibold text-2xl bg-white text-oxford-blue px-4 rounded cursor-pointer hover:bg-melon '>
+            <li className='font-semibold sm:text-2xl bg-white text-oxford-blue px-4 rounded cursor-pointer hover:bg-melon '>
                 Access Your Records
             </li>
             </Link>

@@ -6,8 +6,8 @@ import patient from "./Images/patient.png"
 
 function Share() {
   return (
-    <div className='bg-oxford-blue p-4 flex gap-5 h-full'>
-        <div className='flex flex-col  w-1/2 p-4 pl-20 '>
+    <div className='bg-oxford-blue p-4 sm:flex gap-5 h-full'>
+        <div className='sm:flex flex-col  sm:w-1/2 p-4 sm:pl-20 '>
             <div className='flex  p-4 gap-10 '>
             <p style={{ fontSize: window.innerWidth < 768 ? "1rem" : "3rem", color: "#ffff" }}><FontAwesomeIcon icon={faEnvelopeOpenText} /></p>
             <p style={{ fontSize: window.innerWidth < 768 ? "1rem" : "3rem", color: "#ffff" }}><FontAwesomeIcon icon={faShareFromSquare} /></p>
@@ -32,7 +32,7 @@ function Share() {
 
 
 
-        <div className='w-1/2'>
+        <div className='sm:w-1/2'>
             <img src={patient} />
         </div>
     </div>
